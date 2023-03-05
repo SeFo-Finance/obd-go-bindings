@@ -4,14 +4,29 @@ go 1.18
 
 require (
 	github.com/btcsuite/btcd v0.22.0-beta.0.20211005184431-e3449998be39
+	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f
 	github.com/btcsuite/btcutil v1.0.3-0.20210527170813-e2ba6805a890
+	github.com/btcsuite/btcutil/psbt v1.0.3-0.20210527170813-e2ba6805a890
+	github.com/btcsuite/btcwallet v0.13.1-0.20211201210108-79de92f527dc
+	github.com/btcsuite/btcwallet/wallet/txauthor v1.1.0
+	github.com/btcsuite/btcwallet/wallet/txrules v1.1.0
+	github.com/btcsuite/btcwallet/walletdb v1.3.6-0.20210803004036-eebed51155ec
+	github.com/btcsuite/btcwallet/wtxmgr v1.3.1-0.20210822222949-9b5a201c344c
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-errors/errors v1.0.1
 	github.com/golang/protobuf v1.5.2
+	github.com/lightninglabs/neutrino v0.13.0
+	github.com/lightningnetwork/lightning-onion v1.0.2-0.20210520211913-522b799e65b1
 	github.com/lightningnetwork/lnd v0.14.2-beta
+	github.com/lightningnetwork/lnd/clock v1.1.0
+	github.com/lightningnetwork/lnd/kvdb v1.3.0
+	github.com/lightningnetwork/lnd/queue v1.1.0
+	github.com/lightningnetwork/lnd/ticker v1.1.0
 	github.com/stretchr/testify v1.8.1
+	golang.org/x/crypto v0.5.0
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
+	gopkg.in/macaroon.v2 v2.0.0
 )
 
 require (
@@ -20,14 +35,7 @@ require (
 	github.com/aead/siphash v1.0.1 // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
-	github.com/btcsuite/btcutil/psbt v1.0.3-0.20210527170813-e2ba6805a890 // indirect
-	github.com/btcsuite/btcwallet v0.13.1-0.20211201210108-79de92f527dc // indirect
-	github.com/btcsuite/btcwallet/wallet/txauthor v1.1.0 // indirect
-	github.com/btcsuite/btcwallet/wallet/txrules v1.1.0 // indirect
 	github.com/btcsuite/btcwallet/wallet/txsizes v1.1.0 // indirect
-	github.com/btcsuite/btcwallet/walletdb v1.3.6-0.20210803004036-eebed51155ec // indirect
-	github.com/btcsuite/btcwallet/wtxmgr v1.3.1-0.20210822222949-9b5a201c344c // indirect
 	github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd // indirect
 	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -63,13 +71,7 @@ require (
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/lib/pq v1.10.7 // indirect
 	github.com/lightninglabs/gozmq v0.0.0-20191113021534-d20a764486bf // indirect
-	github.com/lightninglabs/neutrino v0.13.0 // indirect
-	github.com/lightningnetwork/lightning-onion v1.0.2-0.20210520211913-522b799e65b1 // indirect
-	github.com/lightningnetwork/lnd/clock v1.1.0 // indirect
 	github.com/lightningnetwork/lnd/healthcheck v1.2.0 // indirect
-	github.com/lightningnetwork/lnd/kvdb v1.3.0 // indirect
-	github.com/lightningnetwork/lnd/queue v1.1.0 // indirect
-	github.com/lightningnetwork/lnd/ticker v1.1.0 // indirect
 	github.com/ltcsuite/ltcd v0.0.0-20190101042124-f37f8bf35796 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mholt/archiver/v3 v3.5.0 // indirect
@@ -114,7 +116,6 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
@@ -127,7 +128,6 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/errgo.v1 v1.0.1 // indirect
 	gopkg.in/macaroon-bakery.v2 v2.0.1 // indirect
-	gopkg.in/macaroon.v2 v2.0.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
