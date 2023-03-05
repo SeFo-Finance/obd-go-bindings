@@ -3829,5 +3829,5 @@ var Lightning_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "lightning.proto",
+	Metadata: "ob_lightning.proto",
 }

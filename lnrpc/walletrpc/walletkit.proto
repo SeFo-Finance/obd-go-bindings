@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "lightning.proto";
+import "ob_lightning.proto";
 import "signrpc/signer.proto";
 
 package walletrpc;
