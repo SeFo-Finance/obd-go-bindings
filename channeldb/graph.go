@@ -153,16 +153,6 @@ const (
 	feeRateParts = 1e6
 )
 
-// ChannelGraph is a persistent, on-disk graph representation of the Lightning
-// Network. This struct can be used to implement path finding algorithms on top
-// of, and also to update a node's view based on information received from the
-// p2p network. Internally, the graph is stored using a modified adjacency list
-// representation with some added object interaction possible with each
-// serialized edge/node. The graph is stored is directed, meaning that are two
-// edges stored for each channel: an inbound/outbound edge for each node pair.
-// Nodes, edges, and edge information can all be added to the graph
-// independently. Edge removal results in the deletion of all edge information
-
 // channelMapKey is the key structure used for storing channel edge policies.
 type channelMapKey struct {
 	nodeKey route.Vertex
