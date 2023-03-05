@@ -5,7 +5,7 @@ import "signrpc/signer.proto";
 
 package walletrpc;
 
-option go_package = "github.com/SeFo-Finance/obd-go-bindings/lnrpc/walletrpc";
+option go_package = "github.com/SeFo-Finance/obd-go-bindings/obrpc/walletrpc";
 
 // WalletKit is a service that gives access to the core functionalities of the
 // daemon's wallet.
@@ -243,7 +243,7 @@ message ListUnspentRequest {
 
 message ListUnspentResponse {
   // A list of utxos satisfying the specified number of confirmations.
-  repeated lnrpc.Utxo utxos = 1;
+  repeated obrpc.Utxo utxos = 1;
 }
 
 message LeaseOutputRequest {
@@ -254,7 +254,7 @@ message LeaseOutputRequest {
   bytes id = 1;
 
   // The identifying outpoint of the output being leased.
-  lnrpc.OutPoint outpoint = 2;
+  obrpc.OutPoint outpoint = 2;
 
   // The time in seconds before the lock expires. If set to zero, the default
   // lock duration is used.
@@ -273,7 +273,7 @@ message ReleaseOutputRequest {
   bytes id = 1;
 
   // The identifying outpoint of the output being released.
-  lnrpc.OutPoint outpoint = 2;
+  obrpc.OutPoint outpoint = 2;
 }
 
 message ReleaseOutputResponse {}
@@ -608,7 +608,7 @@ enum WitnessType {
 
 message PendingSweep {
   // The outpoint of the output we're attempting to sweep.
-  lnrpc.OutPoint outpoint = 1;
+  obrpc.OutPoint outpoint = 1;
 
   // The witness type of the output we're attempting to sweep.
   WitnessType witness_type = 2;
@@ -668,7 +668,7 @@ message PendingSweepsResponse {
 
 message BumpFeeRequest {
   // The input we're attempting to bump the fee of.
-  lnrpc.OutPoint outpoint = 1;
+  obrpc.OutPoint outpoint = 1;
 
   // The target number of blocks that the input should be spent within.
   uint32 target_conf = 2;
@@ -715,7 +715,7 @@ message ListSweepsResponse {
   }
 
   oneof sweeps {
-    lnrpc.TransactionDetails transaction_details = 1;
+    obrpc.TransactionDetails transaction_details = 1;
     TransactionIDs transaction_ids = 2;
   }
 }
@@ -807,7 +807,7 @@ message TxTemplate {
   If no inputs are specified, coin selection will be performed instead and
   inputs of sufficient value will be added to the resulting PSBT.
   */
-  repeated lnrpc.OutPoint inputs = 1;
+  repeated obrpc.OutPoint inputs = 1;
 
   /*
   A map of all addresses and the amounts to send to in the funded PSBT.
@@ -822,7 +822,7 @@ message UtxoLease {
   bytes id = 1;
 
   // The identifying outpoint of the output being leased.
-  lnrpc.OutPoint outpoint = 2;
+  obrpc.OutPoint outpoint = 2;
 
   /*
   The absolute expiration of the output lease represented as a unix timestamp.

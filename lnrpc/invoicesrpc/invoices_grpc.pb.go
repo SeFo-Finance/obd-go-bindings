@@ -4,7 +4,7 @@ package invoicesrpc
 
 import (
 	context "context"
-	lnrpc "github.com/SeFo-Finance/obd-go-bindings/lnrpc"
+	obrpc "github.com/SeFo-Finance/obd-go-bindings/obrpc"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -40,7 +40,7 @@ type InvoicesClient interface {
 	//
 	//LookupInvoiceV2 attempts to look up at invoice. An invoice can be refrenced
 	//using either its payment hash, payment address, or set ID.
-	LookupInvoiceV2(ctx context.Context, in *LookupInvoiceMsg, opts ...grpc.CallOption) (*lnrpc.Invoice, error)
+	LookupInvoiceV2(ctx context.Context, in *LookupInvoiceMsg, opts ...grpc.CallOption) (*obrpc.Invoice, error)
 }
 
 type invoicesClient struct {
@@ -67,7 +67,7 @@ func (c *invoicesClient) SubscribeSingleInvoice(ctx context.Context, in *Subscri
 }
 
 type Invoices_SubscribeSingleInvoiceClient interface {
-	Recv() (*lnrpc.Invoice, error)
+	Recv() (*obrpc.Invoice, error)
 	grpc.ClientStream
 }
 
@@ -75,8 +75,8 @@ type invoicesSubscribeSingleInvoiceClient struct {
 	grpc.ClientStream
 }
 
-func (x *invoicesSubscribeSingleInvoiceClient) Recv() (*lnrpc.Invoice, error) {
-	m := new(lnrpc.Invoice)
+func (x *invoicesSubscribeSingleInvoiceClient) Recv() (*obrpc.Invoice, error) {
+	m := new(obrpc.Invoice)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -110,8 +110,8 @@ func (c *invoicesClient) SettleInvoice(ctx context.Context, in *SettleInvoiceMsg
 	return out, nil
 }
 
-func (c *invoicesClient) LookupInvoiceV2(ctx context.Context, in *LookupInvoiceMsg, opts ...grpc.CallOption) (*lnrpc.Invoice, error) {
-	out := new(lnrpc.Invoice)
+func (c *invoicesClient) LookupInvoiceV2(ctx context.Context, in *LookupInvoiceMsg, opts ...grpc.CallOption) (*obrpc.Invoice, error) {
+	out := new(obrpc.Invoice)
 	err := c.cc.Invoke(ctx, "/invoicesrpc.Invoices/LookupInvoiceV2", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -144,7 +144,7 @@ type InvoicesServer interface {
 	//
 	//LookupInvoiceV2 attempts to look up at invoice. An invoice can be refrenced
 	//using either its payment hash, payment address, or set ID.
-	LookupInvoiceV2(context.Context, *LookupInvoiceMsg) (*lnrpc.Invoice, error)
+	LookupInvoiceV2(context.Context, *LookupInvoiceMsg) (*obrpc.Invoice, error)
 	mustEmbedUnimplementedInvoicesServer()
 }
 
@@ -164,7 +164,7 @@ func (UnimplementedInvoicesServer) AddHoldInvoice(context.Context, *AddHoldInvoi
 func (UnimplementedInvoicesServer) SettleInvoice(context.Context, *SettleInvoiceMsg) (*SettleInvoiceResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SettleInvoice not implemented")
 }
-func (UnimplementedInvoicesServer) LookupInvoiceV2(context.Context, *LookupInvoiceMsg) (*lnrpc.Invoice, error) {
+func (UnimplementedInvoicesServer) LookupInvoiceV2(context.Context, *LookupInvoiceMsg) (*obrpc.Invoice, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LookupInvoiceV2 not implemented")
 }
 func (UnimplementedInvoicesServer) mustEmbedUnimplementedInvoicesServer() {}
@@ -189,7 +189,7 @@ func _Invoices_SubscribeSingleInvoice_Handler(srv interface{}, stream grpc.Serve
 }
 
 type Invoices_SubscribeSingleInvoiceServer interface {
-	Send(*lnrpc.Invoice) error
+	Send(*obrpc.Invoice) error
 	grpc.ServerStream
 }
 
@@ -197,7 +197,7 @@ type invoicesSubscribeSingleInvoiceServer struct {
 	grpc.ServerStream
 }
 
-func (x *invoicesSubscribeSingleInvoiceServer) Send(m *lnrpc.Invoice) error {
+func (x *invoicesSubscribeSingleInvoiceServer) Send(m *obrpc.Invoice) error {
 	return x.ServerStream.SendMsg(m)
 }
 

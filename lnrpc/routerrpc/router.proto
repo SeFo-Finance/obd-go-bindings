@@ -4,7 +4,7 @@ import "ob_lightning.proto";
 
 package routerrpc;
 
-option go_package = "github.com/SeFo-Finance/obd-go-bindings/lnrpc/routerrpc";
+option go_package = "github.com/SeFo-Finance/obd-go-bindings/obrpc/routerrpc";
 
 // Router is a service that offers advanced interaction with the router
 // subsystem of the daemon.
@@ -14,13 +14,13 @@ service Router {
   PaymentRequest to the final destination. The call returns a stream of
   payment updates.
   */
-  rpc OB_SendPaymentV2(SendPaymentRequest) returns (stream lnrpc.Payment);
+  rpc OB_SendPaymentV2(SendPaymentRequest) returns (stream obrpc.Payment);
 
   /*
   TrackPaymentV2 returns an update stream for the payment identified by the
   payment hash.
   */
-  rpc OB_TrackPaymentV2(TrackPaymentRequest) returns (stream lnrpc.Payment);
+  rpc OB_TrackPaymentV2(TrackPaymentRequest) returns (stream obrpc.Payment);
 
   /*
   EstimateRouteFee allows callers to obtain a lower bound w.r.t how much it
@@ -45,7 +45,7 @@ service Router {
   route manually. This can be used for things like rebalancing, and atomic
   swaps.
   */
-  rpc SendToRouteV2(SendToRouteRequest) returns (lnrpc.HTLCAttempt);
+  rpc SendToRouteV2(SendToRouteRequest) returns (obrpc.HTLCAttempt);
 
   /*
   ResetMissionControl clears all mission control state and starts with a clean
@@ -243,7 +243,7 @@ message SendPaymentRequest {
   /*
   Optional route hints to reach the destination through private channels.
   */
-  repeated lnrpc.RouteHint route_hints = 10;
+  repeated obrpc.RouteHint route_hints = 10;
 
   /*
   An optional field that can be used to pass an arbitrary set of TLV records
@@ -264,7 +264,7 @@ message SendPaymentRequest {
   the router will try to load destination features from the graph as a
   fallback.
   */
-  repeated lnrpc.FeatureBit dest_features = 16;
+  repeated obrpc.FeatureBit dest_features = 16;
 
   /*
   The maximum number of partial payments that may be use to complete the full
@@ -336,7 +336,7 @@ message SendToRouteRequest {
   bytes payment_hash = 1;
 
   // Route that should be used to attempt to complete the payment.
-  lnrpc.Route route = 2;
+  obrpc.Route route = 2;
 }
 
 message SendToRouteResponse {
@@ -344,7 +344,7 @@ message SendToRouteResponse {
   bytes preimage = 1;
 
   // The failure message in case the payment failed.
-  lnrpc.Failure failure = 2;
+  obrpc.Failure failure = 2;
 }
 
 message ResetMissionControlRequest {}
@@ -530,7 +530,7 @@ message BuildRouteResponse {
   /*
   Fully specified route that can be used to execute the payment.
   */
-  lnrpc.Route route = 1;
+  obrpc.Route route = 1;
 }
 
 message SubscribeHtlcEventsRequest {}
@@ -625,7 +625,7 @@ message LinkFailEvent {
   HtlcInfo info = 1;
 
   // FailureCode is the BOLT error code for the failure.
-  lnrpc.Failure.FailureCode wire_failure = 2;
+  obrpc.Failure.FailureCode wire_failure = 2;
 
   /*
   FailureDetail provides additional information about the reason for the
@@ -717,7 +717,7 @@ message PaymentStatus {
   /*
   The HTLCs made in attempt to settle the payment [EXPERIMENTAL].
   */
-  repeated lnrpc.HTLCAttempt htlcs = 4;
+  repeated obrpc.HTLCAttempt htlcs = 4;
 }
 
 message CircuitKey {
@@ -794,7 +794,7 @@ enum ResolveHoldForwardAction {
 }
 
 message UpdateChanStatusRequest {
-  lnrpc.ChannelPoint chan_point = 1;
+  obrpc.ChannelPoint chan_point = 1;
 
   ChanStatusAction action = 2;
 }

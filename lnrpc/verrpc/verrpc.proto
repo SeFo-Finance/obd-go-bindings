@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package verrpc;
 
-option go_package = "github.com/SeFo-Finance/obd-go-bindings/lnrpc/verrpc";
+option go_package = "github.com/SeFo-Finance/obd-go-bindings/obrpc/verrpc";
 
 // Versioner is a service that can be used to get information about the version
 // and build information of the running daemon.

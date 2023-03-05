@@ -4,7 +4,7 @@ package routerrpc
 
 import (
 	context "context"
-	lnrpc "github.com/SeFo-Finance/obd-go-bindings/lnrpc"
+	obrpc "github.com/SeFo-Finance/obd-go-bindings/obrpc"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -45,7 +45,7 @@ type RouterClient interface {
 	//method differs from SendPayment in that it allows users to specify a full
 	//route manually. This can be used for things like rebalancing, and atomic
 	//swaps.
-	SendToRouteV2(ctx context.Context, in *SendToRouteRequest, opts ...grpc.CallOption) (*lnrpc.HTLCAttempt, error)
+	SendToRouteV2(ctx context.Context, in *SendToRouteRequest, opts ...grpc.CallOption) (*obrpc.HTLCAttempt, error)
 	//
 	//ResetMissionControl clears all mission control state and starts with a clean
 	//slate.
@@ -130,7 +130,7 @@ func (c *routerClient) OB_SendPaymentV2(ctx context.Context, in *SendPaymentRequ
 }
 
 type Router_OB_SendPaymentV2Client interface {
-	Recv() (*lnrpc.Payment, error)
+	Recv() (*obrpc.Payment, error)
 	grpc.ClientStream
 }
 
@@ -138,8 +138,8 @@ type routerOB_SendPaymentV2Client struct {
 	grpc.ClientStream
 }
 
-func (x *routerOB_SendPaymentV2Client) Recv() (*lnrpc.Payment, error) {
-	m := new(lnrpc.Payment)
+func (x *routerOB_SendPaymentV2Client) Recv() (*obrpc.Payment, error) {
+	m := new(obrpc.Payment)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (c *routerClient) OB_TrackPaymentV2(ctx context.Context, in *TrackPaymentRe
 }
 
 type Router_OB_TrackPaymentV2Client interface {
-	Recv() (*lnrpc.Payment, error)
+	Recv() (*obrpc.Payment, error)
 	grpc.ClientStream
 }
 
@@ -170,8 +170,8 @@ type routerOB_TrackPaymentV2Client struct {
 	grpc.ClientStream
 }
 
-func (x *routerOB_TrackPaymentV2Client) Recv() (*lnrpc.Payment, error) {
-	m := new(lnrpc.Payment)
+func (x *routerOB_TrackPaymentV2Client) Recv() (*obrpc.Payment, error) {
+	m := new(obrpc.Payment)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -197,8 +197,8 @@ func (c *routerClient) SendToRoute(ctx context.Context, in *SendToRouteRequest, 
 	return out, nil
 }
 
-func (c *routerClient) SendToRouteV2(ctx context.Context, in *SendToRouteRequest, opts ...grpc.CallOption) (*lnrpc.HTLCAttempt, error) {
-	out := new(lnrpc.HTLCAttempt)
+func (c *routerClient) SendToRouteV2(ctx context.Context, in *SendToRouteRequest, opts ...grpc.CallOption) (*obrpc.HTLCAttempt, error) {
+	out := new(obrpc.HTLCAttempt)
 	err := c.cc.Invoke(ctx, "/routerrpc.Router/SendToRouteV2", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -437,7 +437,7 @@ type RouterServer interface {
 	//method differs from SendPayment in that it allows users to specify a full
 	//route manually. This can be used for things like rebalancing, and atomic
 	//swaps.
-	SendToRouteV2(context.Context, *SendToRouteRequest) (*lnrpc.HTLCAttempt, error)
+	SendToRouteV2(context.Context, *SendToRouteRequest) (*obrpc.HTLCAttempt, error)
 	//
 	//ResetMissionControl clears all mission control state and starts with a clean
 	//slate.
@@ -515,7 +515,7 @@ func (UnimplementedRouterServer) EstimateRouteFee(context.Context, *RouteFeeRequ
 func (UnimplementedRouterServer) SendToRoute(context.Context, *SendToRouteRequest) (*SendToRouteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendToRoute not implemented")
 }
-func (UnimplementedRouterServer) SendToRouteV2(context.Context, *SendToRouteRequest) (*lnrpc.HTLCAttempt, error) {
+func (UnimplementedRouterServer) SendToRouteV2(context.Context, *SendToRouteRequest) (*obrpc.HTLCAttempt, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendToRouteV2 not implemented")
 }
 func (UnimplementedRouterServer) ResetMissionControl(context.Context, *ResetMissionControlRequest) (*ResetMissionControlResponse, error) {
@@ -576,7 +576,7 @@ func _Router_OB_SendPaymentV2_Handler(srv interface{}, stream grpc.ServerStream)
 }
 
 type Router_OB_SendPaymentV2Server interface {
-	Send(*lnrpc.Payment) error
+	Send(*obrpc.Payment) error
 	grpc.ServerStream
 }
 
@@ -584,7 +584,7 @@ type routerOB_SendPaymentV2Server struct {
 	grpc.ServerStream
 }
 
-func (x *routerOB_SendPaymentV2Server) Send(m *lnrpc.Payment) error {
+func (x *routerOB_SendPaymentV2Server) Send(m *obrpc.Payment) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -597,7 +597,7 @@ func _Router_OB_TrackPaymentV2_Handler(srv interface{}, stream grpc.ServerStream
 }
 
 type Router_OB_TrackPaymentV2Server interface {
-	Send(*lnrpc.Payment) error
+	Send(*obrpc.Payment) error
 	grpc.ServerStream
 }
 
@@ -605,7 +605,7 @@ type routerOB_TrackPaymentV2Server struct {
 	grpc.ServerStream
 }
 
-func (x *routerOB_TrackPaymentV2Server) Send(m *lnrpc.Payment) error {
+func (x *routerOB_TrackPaymentV2Server) Send(m *obrpc.Payment) error {
 	return x.ServerStream.SendMsg(m)
 }
 

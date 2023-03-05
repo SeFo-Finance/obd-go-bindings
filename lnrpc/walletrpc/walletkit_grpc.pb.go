@@ -4,7 +4,7 @@ package walletrpc
 
 import (
 	context "context"
-	signrpc "github.com/SeFo-Finance/obd-go-bindings/lnrpc/signrpc"
+	signrpc "github.com/SeFo-Finance/obd-go-bindings/obrpc/signrpc"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
