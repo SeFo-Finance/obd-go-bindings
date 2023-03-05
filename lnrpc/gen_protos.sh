@@ -6,7 +6,7 @@ set -e
 function generate() {
   echo "Generating root gRPC server protos"
 
-  PROTOS="lightning.proto"
+  PROTOS="lightning.proto walletunlocker.proto stateservice.proto **/*.proto"
 
   # For each of the sub-servers, we then generate their protos, but a restricted
   # set as they don't yet require REST proxies, or swagger docs.
@@ -22,14 +22,14 @@ function generate() {
   done
 
   
-#  PACKAGES="autopilotrpc chainrpc invoicesrpc routerrpc signrpc verrpc walletrpc watchtowerrpc wtclientrpc"
-#  for package in $PACKAGES; do
-#    # Special import for the wallet kit.
-#    manual_import=""
-#    if [[ "$package" == "walletrpc" ]]; then
-#      manual_import="github.com/lightningnetwork/lnd/lnrpc/signrpc"
-#    fi
-#
+  PACKAGES="autopilotrpc chainrpc invoicesrpc routerrpc signrpc verrpc walletrpc watchtowerrpc wtclientrpc"
+  for package in $PACKAGES; do
+    # Special import for the wallet kit.
+    manual_import=""
+    if [[ "$package" == "walletrpc" ]]; then
+      manual_import="github.com/lightningnetwork/lnd/lnrpc/signrpc"
+    fi
+
 #    opts="package_name=$package,manual_import=$manual_import,js_stubs=1,build_tags=// +build js"
 #    pushd $package
 #    protoc -I/usr/local/include -I. -I.. \
@@ -38,7 +38,7 @@ function generate() {
 #      --custom_opt="$opts" \
 #      "$(find . -name '*.proto')"
 #    popd
-#  done
+  done
 }
 
 # format formats the *.proto files with the clang-format utility.
