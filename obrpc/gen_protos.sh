@@ -6,7 +6,7 @@ set -e
 function generate() {
   echo "Generating root gRPC server protos"
 
-  PROTOS="ob_lightning.proto walletunlocker.proto stateservice.proto **/*.proto"
+  PROTOS="ob_lightning.proto ob_walletunlocker.proto ob_stateservice.proto **/*.proto"
 
   # For each of the sub-servers, we then generate their protos, but a restricted
   # set as they don't yet require REST proxies, or swagger docs.
