@@ -29,4 +29,4 @@ RUN cd /tmp \
 
 WORKDIR /build
 
-CMD ["/bin/bash", "/build/lnrpc/gen_protos.sh"]
+CMD ["/bin/bash", "/build/obrpc/gen_protos.sh"]

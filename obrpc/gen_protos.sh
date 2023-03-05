@@ -46,8 +46,8 @@ function format() {
   find . -name "*.proto" -print0 | xargs -0 clang-format --style=file -i
 }
 
-# Compile and format the lnrpc package.
-pushd lnrpc
+# Compile and format the obrpc package.
+pushd obrpc
 format
 generate
 popd
