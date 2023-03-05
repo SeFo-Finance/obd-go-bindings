@@ -98,7 +98,7 @@ list:
 
 rpc:
 	@$(call print, "Compiling protos.")
-	cd ./obrpc; ./gen_protos_docker.sh
+	cd ./lnrpc; ./gen_protos_docker.sh
 
 .PHONY: all \
 	fmt \

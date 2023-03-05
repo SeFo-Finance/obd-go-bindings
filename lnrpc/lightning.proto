@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package obrpc;
+package lnrpc;
 
-option go_package = "github.com/SeFo-Finance/obd-go-bindings/obrpc";
+option go_package = "github.com/SeFo-Finance/obd-go-bindings/lnrpc";
 
 /*
  * Comments in this file will be directly parsed into the API
@@ -2904,7 +2904,7 @@ message QueryRoutesRequest {
   /*
   Optional route hints to reach the destination through private channels.
   */
-  repeated obrpc.RouteHint route_hints = 16;
+  repeated lnrpc.RouteHint route_hints = 16;
 
   /*
   Features assumed to be supported by the final node. All transitive feature
@@ -2913,7 +2913,7 @@ message QueryRoutesRequest {
   the router will try to load destination features from the graph as a
   fallback.
   */
-  repeated obrpc.FeatureBit dest_features = 17;
+  repeated lnrpc.FeatureBit dest_features = 17;
 }
 
 message NodePair {
