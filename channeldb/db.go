@@ -4,11 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"io/ioutil"
-	"net"
-	"os"
-
-	"github.com/SeFo-Finance/obd-go-bindings/routing/route"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/go-errors/errors"
@@ -21,8 +16,8 @@ import (
 	"github.com/lightningnetwork/lnd/channeldb/migration23"
 	"github.com/lightningnetwork/lnd/channeldb/migration24"
 	"github.com/lightningnetwork/lnd/channeldb/migration_01_to_11"
-	"github.com/lightningnetwork/lnd/clock"
 	"github.com/lightningnetwork/lnd/kvdb"
+	"net"
 
 	"github.com/SeFo-Finance/obd-go-bindings/lnwire"
 )
@@ -226,167 +221,6 @@ type DB struct {
 
 	// channelStateDB separates all DB operations on channel state.
 	channelStateDB *ChannelStateDB
-
-	dbPath string
-	graph  *ChannelGraph
-	clock  clock.Clock
-	dryRun bool
-}
-
-// Open opens or creates channeldb. Any necessary schemas migrations due
-// to updates will take place as necessary.
-// TODO(bhandras): deprecate this function.
-func Open(dbPath string, modifiers ...OptionModifier) (*DB, error) {
-	opts := DefaultOptions()
-	for _, modifier := range modifiers {
-		modifier(&opts)
-	}
-
-	backend, err := kvdb.GetBoltBackend(&kvdb.BoltBackendConfig{
-		DBPath:            dbPath,
-		DBFileName:        dbName,
-		NoFreelistSync:    opts.NoFreelistSync,
-		AutoCompact:       opts.AutoCompact,
-		AutoCompactMinAge: opts.AutoCompactMinAge,
-		DBTimeout:         opts.DBTimeout,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	db, err := CreateWithBackend(backend, modifiers...)
-	if err == nil {
-		db.dbPath = dbPath
-	}
-	return db, err
-}
-
-// CreateWithBackend creates channeldb instance using the passed kvdb.Backend.
-// Any necessary schemas migrations due to updates will take place as necessary.
-func CreateWithBackend(backend kvdb.Backend, modifiers ...OptionModifier) (*DB, error) {
-	if err := initChannelDB(backend); err != nil {
-		return nil, err
-	}
-
-	opts := DefaultOptions()
-	for _, modifier := range modifiers {
-		modifier(&opts)
-	}
-
-	chanDB := &DB{
-		Backend: backend,
-		channelStateDB: &ChannelStateDB{
-			linkNodeDB: &LinkNodeDB{
-				backend: backend,
-			},
-			backend: backend,
-		},
-		clock:  opts.clock,
-		dryRun: opts.dryRun,
-	}
-
-	// Set the parent pointer (only used in tests).
-	chanDB.channelStateDB.parent = chanDB
-
-	var err error
-	chanDB.graph, err = NewChannelGraph(
-		backend, opts.RejectCacheSize, opts.ChannelCacheSize,
-		opts.BatchCommitInterval, opts.PreAllocCacheNumNodes,
-		opts.UseGraphCache,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Synchronize the version of database and apply migrations if needed.
-	if err := chanDB.syncVersions(dbVersions); err != nil {
-		backend.Close()
-		return nil, err
-	}
-
-	return chanDB, nil
-}
-
-// Path returns the file path to the channel database.
-func (d *DB) Path() string {
-	return d.dbPath
-}
-
-var dbTopLevelBuckets = [][]byte{
-	openChannelBucket,
-	closedChannelBucket,
-	forwardingLogBucket,
-	fwdPackagesKey,
-	invoiceBucket,
-	payAddrIndexBucket,
-	setIDIndexBucket,
-	paymentsIndexBucket,
-	peersBucket,
-	nodeInfoBucket,
-	metaBucket,
-	closeSummaryBucket,
-	outpointBucket,
-	historicalChannelBucket,
-}
-
-// Wipe completely deletes all saved state within all used buckets within the
-// database. The deletion is done in a single transaction, therefore this
-// operation is fully atomic.
-func (d *DB) Wipe() error {
-	err := kvdb.Update(d, func(tx kvdb.RwTx) error {
-		for _, tlb := range dbTopLevelBuckets {
-			err := tx.DeleteTopLevelBucket(tlb)
-			if err != nil && err != kvdb.ErrBucketNotFound {
-				return err
-			}
-		}
-		return nil
-	}, func() {})
-	if err != nil {
-		return err
-	}
-
-	return initChannelDB(d.Backend)
-}
-
-// initChannelDB creates and initializes a fresh version of channeldb. In the
-// case that the target path has not yet been created or doesn't yet exist, then
-// the path is created. Additionally, all required top-level buckets used within
-// the database are created.
-func initChannelDB(db kvdb.Backend) error {
-	err := kvdb.Update(db, func(tx kvdb.RwTx) error {
-		meta := &Meta{}
-		// Check if DB is already initialized.
-		err := fetchMeta(meta, tx)
-		if err == nil {
-			return nil
-		}
-
-		for _, tlb := range dbTopLevelBuckets {
-			if _, err := tx.CreateTopLevelBucket(tlb); err != nil {
-				return err
-			}
-		}
-
-		meta.DbVersionNumber = getLatestDBVersion(dbVersions)
-		return putMeta(meta, tx)
-	}, func() {})
-	if err != nil {
-		return fmt.Errorf("unable to create new channeldb: %v", err)
-	}
-
-	return nil
-}
-
-// fileExists returns true if the file exists, and false otherwise.
-func fileExists(path string) bool {
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-	}
-
-	return true
 }
 
 // ChannelStateDB is a database that keeps track of all channel state.
@@ -1121,50 +955,6 @@ func (c *ChannelStateDB) RestoreChannelShells(channelShells ...*ChannelShell) er
 	return nil
 }
 
-// AddrsForNode consults the graph and channel database for all addresses known
-// to the passed node public key.
-func (d *DB) AddrsForNode(nodePub *btcec.PublicKey) ([]net.Addr,
-	error) {
-
-	linkNode, err := d.channelStateDB.linkNodeDB.FetchLinkNode(nodePub)
-	if err != nil {
-		return nil, err
-	}
-
-	// We'll also query the graph for this peer to see if they have any
-	// addresses that we don't currently have stored within the link node
-	// database.
-	pubKey, err := route.NewVertexFromBytes(nodePub.SerializeCompressed())
-	if err != nil {
-		return nil, err
-	}
-	graphNode, err := d.graph.FetchLightningNode(pubKey)
-	if err != nil && err != ErrGraphNodeNotFound {
-		return nil, err
-	} else if err == ErrGraphNodeNotFound {
-		// If the node isn't found, then that's OK, as we still have the
-		// link node data. But any other error needs to be returned.
-		graphNode = &LightningNode{}
-	}
-
-	// Now that we have both sources of addrs for this node, we'll use a
-	// map to de-duplicate any addresses between the two sources, and
-	// produce a final list of the combined addrs.
-	addrs := make(map[string]net.Addr)
-	for _, addr := range linkNode.Addresses {
-		addrs[addr.String()] = addr
-	}
-	for _, addr := range graphNode.Addresses {
-		addrs[addr.String()] = addr
-	}
-	dedupedAddrs := make([]net.Addr, 0, len(addrs))
-	for _, addr := range addrs {
-		dedupedAddrs = append(dedupedAddrs, addr)
-	}
-
-	return dedupedAddrs, nil
-}
-
 // AbandonChannel attempts to remove the target channel from the open channel
 // database. If the channel was already removed (has a closed channel entry),
 // then we'll return a nil error. Otherwise, we'll insert a new close summary
@@ -1275,90 +1065,6 @@ func (c *ChannelStateDB) DeleteChannelOpeningState(outPoint []byte) error {
 	}, func() {})
 }
 
-// syncVersions function is used for safe db version synchronization. It
-// applies migration functions to the current database and recovers the
-// previous state of db if at least one error/panic appeared during migration.
-func (d *DB) syncVersions(versions []version) error {
-	meta, err := d.FetchMeta(nil)
-	if err != nil {
-		if err == ErrMetaNotFound {
-			meta = &Meta{}
-		} else {
-			return err
-		}
-	}
-
-	latestVersion := getLatestDBVersion(versions)
-	log.Infof("Checking for schema update: latest_version=%v, "+
-		"db_version=%v", latestVersion, meta.DbVersionNumber)
-
-	switch {
-
-	// If the database reports a higher version that we are aware of, the
-	// user is probably trying to revert to a prior version of lnd. We fail
-	// here to prevent reversions and unintended corruption.
-	case meta.DbVersionNumber > latestVersion:
-		log.Errorf("Refusing to revert from db_version=%d to "+
-			"lower version=%d", meta.DbVersionNumber,
-			latestVersion)
-		return ErrDBReversion
-
-	// If the current database version matches the latest version number,
-	// then we don't need to perform any migrations.
-	case meta.DbVersionNumber == latestVersion:
-		return nil
-	}
-
-	log.Infof("Performing database schema migration")
-
-	// Otherwise, we fetch the migrations which need to applied, and
-	// execute them serially within a single database transaction to ensure
-	// the migration is atomic.
-	migrations, migrationVersions := getMigrationsToApply(
-		versions, meta.DbVersionNumber,
-	)
-	return kvdb.Update(d, func(tx kvdb.RwTx) error {
-		for i, migration := range migrations {
-			if migration == nil {
-				continue
-			}
-
-			log.Infof("Applying migration #%v", migrationVersions[i])
-
-			if err := migration(tx); err != nil {
-				log.Infof("Unable to apply migration #%v",
-					migrationVersions[i])
-				return err
-			}
-		}
-
-		meta.DbVersionNumber = latestVersion
-		err := putMeta(meta, tx)
-		if err != nil {
-			return err
-		}
-
-		// In dry-run mode, return an error to prevent the transaction
-		// from committing.
-		if d.dryRun {
-			return ErrDryRunMigrationOK
-		}
-
-		return nil
-	}, func() {})
-}
-
-// ChannelGraph returns the current instance of the directed channel graph.
-func (d *DB) ChannelGraph() *ChannelGraph {
-	return d.graph
-}
-
-// ChannelStateDB returns the sub database that is concerned with the channel
-// state.
-func (d *DB) ChannelStateDB() *ChannelStateDB {
-	return d.channelStateDB
-}
-
 func getLatestDBVersion(versions []version) uint32 {
 	return versions[len(versions)-1].number
 }
@@ -1433,38 +1139,4 @@ func (c *ChannelStateDB) FetchHistoricalChannel(outPoint *wire.OutPoint) (
 	}
 
 	return channel, nil
-}
-
-// MakeTestDB creates a new instance of the ChannelDB for testing purposes.
-// A callback which cleans up the created temporary directories is also
-// returned and intended to be executed after the test completes.
-func MakeTestDB(modifiers ...OptionModifier) (*DB, func(), error) {
-	// First, create a temporary directory to be used for the duration of
-	// this test.
-	tempDirName, err := ioutil.TempDir("", "channeldb")
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Next, create channeldb for the first time.
-	backend, backendCleanup, err := kvdb.GetTestBackend(tempDirName, "cdb")
-	if err != nil {
-		backendCleanup()
-		return nil, nil, err
-	}
-
-	cdb, err := CreateWithBackend(backend, modifiers...)
-	if err != nil {
-		backendCleanup()
-		os.RemoveAll(tempDirName)
-		return nil, nil, err
-	}
-
-	cleanUp := func() {
-		cdb.Close()
-		backendCleanup()
-		os.RemoveAll(tempDirName)
-	}
-
-	return cdb, cleanUp, nil
 }

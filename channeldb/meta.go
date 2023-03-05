@@ -20,23 +20,6 @@ type Meta struct {
 	DbVersionNumber uint32
 }
 
-// FetchMeta fetches the meta data from boltdb and returns filled meta
-// structure.
-func (d *DB) FetchMeta(tx kvdb.RTx) (*Meta, error) {
-	var meta *Meta
-
-	err := kvdb.View(d, func(tx kvdb.RTx) error {
-		return fetchMeta(meta, tx)
-	}, func() {
-		meta = &Meta{}
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return meta, nil
-}
-
 // fetchMeta is an internal helper function used in order to allow callers to
 // re-use a database transaction. See the publicly exported FetchMeta method
 // for more information.
@@ -54,13 +37,6 @@ func fetchMeta(meta *Meta, tx kvdb.RTx) error {
 	}
 
 	return nil
-}
-
-// PutMeta writes the passed instance of the database met-data struct to disk.
-func (d *DB) PutMeta(meta *Meta) error {
-	return kvdb.Update(d, func(tx kvdb.RwTx) error {
-		return putMeta(meta, tx)
-	}, func() {})
 }
 
 // putMeta is an internal helper function used in order to allow callers to

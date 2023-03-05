@@ -6,15 +6,17 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/SeFo-Finance/obd-go-bindings/lnwire"
 	"io"
 	"strconv"
 	"strings"
 
+	"github.com/SeFo-Finance/obd-go-bindings/lnwire"
+
 	"github.com/btcsuite/btcd/btcec"
 	sphinx "github.com/lightningnetwork/lightning-onion"
-	"github.com/lightningnetwork/lnd/record"
 	"github.com/lightningnetwork/lnd/tlv"
+
+	"github.com/SeFo-Finance/obd-go-bindings/record"
 )
 
 // VertexSize is the size of the array to store a vertex.

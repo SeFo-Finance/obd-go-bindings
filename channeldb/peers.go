@@ -1,13 +1,8 @@
 package channeldb
 
 import (
-	"bytes"
 	"errors"
-	"fmt"
 	"time"
-
-	"github.com/SeFo-Finance/obd-go-bindings/routing/route"
-	"github.com/lightningnetwork/lnd/kvdb"
 )
 
 var (
@@ -44,80 +39,4 @@ type FlapCount struct {
 
 	// LastFlap is the timestamp of the last flap recorded for a peer.
 	LastFlap time.Time
-}
-
-// WriteFlapCounts writes the flap count for a set of peers to disk, creating a
-// bucket for the peer's pubkey if necessary. Note that this function overwrites
-// the current value.
-func (d *DB) WriteFlapCounts(flapCounts map[route.Vertex]*FlapCount) error {
-	return kvdb.Update(d, func(tx kvdb.RwTx) error {
-		// Run through our set of flap counts and record them for
-		// each peer, creating a bucket for the peer pubkey if required.
-		for peer, flapCount := range flapCounts {
-			peers := tx.ReadWriteBucket(peersBucket)
-
-			peerBucket, err := peers.CreateBucketIfNotExists(
-				peer[:],
-			)
-			if err != nil {
-				return err
-			}
-
-			var b bytes.Buffer
-			err = serializeTime(&b, flapCount.LastFlap)
-			if err != nil {
-				return err
-			}
-
-			if err = WriteElement(&b, flapCount.Count); err != nil {
-				return err
-			}
-
-			err = peerBucket.Put(flapCountKey, b.Bytes())
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	}, func() {})
-}
-
-// ReadFlapCount attempts to read the flap count for a peer, failing if the
-// peer is not found or we do not have flap count stored.
-func (d *DB) ReadFlapCount(pubkey route.Vertex) (*FlapCount, error) {
-	var flapCount FlapCount
-
-	if err := kvdb.View(d, func(tx kvdb.RTx) error {
-		peers := tx.ReadBucket(peersBucket)
-
-		peerBucket := peers.NestedReadBucket(pubkey[:])
-		if peerBucket == nil {
-			return ErrNoPeerBucket
-		}
-
-		flapBytes := peerBucket.Get(flapCountKey)
-		if flapBytes == nil {
-			return fmt.Errorf("flap count not recorded for: %v",
-				pubkey)
-		}
-
-		var (
-			err error
-			r   = bytes.NewReader(flapBytes)
-		)
-
-		flapCount.LastFlap, err = deserializeTime(r)
-		if err != nil {
-			return err
-		}
-
-		return ReadElements(r, &flapCount.Count)
-	}, func() {
-		flapCount = FlapCount{}
-	}); err != nil {
-		return nil, err
-	}
-
-	return &flapCount, nil
 }

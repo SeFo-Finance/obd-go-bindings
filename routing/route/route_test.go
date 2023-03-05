@@ -3,11 +3,13 @@ package route
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/SeFo-Finance/obd-go-bindings/lnwire"
 	"testing"
 
+	"github.com/SeFo-Finance/obd-go-bindings/lnwire"
+
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/lightningnetwork/lnd/record"
+
+	"github.com/SeFo-Finance/obd-go-bindings/record"
 )
 
 var (

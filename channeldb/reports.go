@@ -119,25 +119,6 @@ type ResolverReport struct {
 	SpendTxID *chainhash.Hash
 }
 
-// PutResolverReport creates and commits a transaction that is used to write a
-// resolver report to disk.
-func (d *DB) PutResolverReport(tx kvdb.RwTx, chainHash chainhash.Hash,
-	channelOutpoint *wire.OutPoint, report *ResolverReport) error {
-
-	putReportFunc := func(tx kvdb.RwTx) error {
-		return putReport(tx, chainHash, channelOutpoint, report)
-	}
-
-	// If the transaction is nil, we'll create a new one.
-	if tx == nil {
-		return kvdb.Update(d, putReportFunc, func() {})
-	}
-
-	// Otherwise, we can write the report to disk using the existing
-	// transaction.
-	return putReportFunc(tx)
-}
-
 // putReport puts a report in the bucket provided, with its outpoint as its key.
 func putReport(tx kvdb.RwTx, chainHash chainhash.Hash,
 	channelOutpoint *wire.OutPoint, report *ResolverReport) error {

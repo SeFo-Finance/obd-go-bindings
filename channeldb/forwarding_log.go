@@ -40,14 +40,6 @@ const (
 	MaxResponseEvents = 50000
 )
 
-// ForwardingLog returns an instance of the ForwardingLog object backed by the
-// target database instance.
-func (d *DB) ForwardingLog() *ForwardingLog {
-	return &ForwardingLog{
-		db: d,
-	}
-}
-
 // ForwardingLog is a time series database that logs the fulfilment of payment
 // circuits by a lightning network daemon. The log contains a series of
 // forwarding events which map a timestamp to a forwarding event. A forwarding

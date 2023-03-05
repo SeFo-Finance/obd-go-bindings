@@ -18,11 +18,12 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"github.com/lightningnetwork/lnd/input"
 	"github.com/lightningnetwork/lnd/keychain"
 	"github.com/lightningnetwork/lnd/kvdb"
 	"github.com/lightningnetwork/lnd/shachain"
 	"github.com/lightningnetwork/lnd/tlv"
+
+	"github.com/SeFo-Finance/obd-go-bindings/input"
 
 	"github.com/SeFo-Finance/obd-go-bindings/lnwire"
 )

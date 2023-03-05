@@ -13,12 +13,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/SeFo-Finance/obd-go-bindings/lnwire"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil"
 	"github.com/lightningnetwork/lnd/tor"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/SeFo-Finance/obd-go-bindings/lnwire"
 )
 
 const deliveryAddressMaxSize = 34
@@ -312,12 +313,12 @@ func newMsgOpenChannel(t testing.TB, r *rand.Rand) *lnwire.OpenChannel {
 	t.Helper()
 
 	msg := &lnwire.OpenChannel{
-		FundingAmount:        btcutil.Amount(r.Int63()),
-		PushAmount:           lnwire.MilliSatoshi(r.Int63()),
+		FundingBtcAmount:     btcutil.Amount(r.Int63()),
+		PushBtcAmount:        lnwire.MilliSatoshi(r.Int63()),
 		DustLimit:            btcutil.Amount(r.Int63()),
-		MaxValueInFlight:     lnwire.MilliSatoshi(r.Int63()),
-		ChannelReserve:       btcutil.Amount(r.Int63()),
-		HtlcMinimum:          lnwire.MilliSatoshi(r.Int63()),
+		MaxValueInFlight:     lnwire.UnitPrec11(r.Int63()),
+		ChannelReserve:       lnwire.UnitPrec8(r.Int63()),
+		HtlcMinimum:          lnwire.UnitPrec11(r.Int63()),
 		FeePerKiloWeight:     uint32(r.Int31()),
 		CsvDelay:             uint16(r.Intn(1 << 16)),
 		MaxAcceptedHTLCs:     uint16(r.Intn(1 << 16)),
@@ -345,10 +346,10 @@ func newMsgAcceptChannel(t testing.TB, r *rand.Rand) *lnwire.AcceptChannel {
 
 	msg := &lnwire.AcceptChannel{
 		DustLimit:             btcutil.Amount(r.Int63()),
-		MaxValueInFlight:      lnwire.MilliSatoshi(r.Int63()),
-		ChannelReserve:        btcutil.Amount(r.Int63()),
+		MaxValueInFlight:      lnwire.UnitPrec11(r.Int63()),
+		ChannelReserve:        lnwire.UnitPrec8(r.Int63()),
 		MinAcceptDepth:        uint32(r.Int31()),
-		HtlcMinimum:           lnwire.MilliSatoshi(r.Int63()),
+		HtlcMinimum:           lnwire.UnitPrec11(r.Int63()),
 		CsvDelay:              uint16(r.Intn(1 << 16)),
 		MaxAcceptedHTLCs:      uint16(r.Intn(1 << 16)),
 		FundingKey:            randPubKey(t),
@@ -482,7 +483,7 @@ func newMsgUpdateAddHTLC(t testing.TB, r *rand.Rand) *lnwire.UpdateAddHTLC {
 
 	msg := &lnwire.UpdateAddHTLC{
 		ID:        r.Uint64(),
-		Amount:    lnwire.MilliSatoshi(r.Int63()),
+		Amount:    lnwire.UnitPrec11(r.Int63()),
 		Expiry:    r.Uint32(),
 		ExtraData: createExtraData(t, r),
 	}
@@ -674,7 +675,7 @@ func newMsgChannelUpdate(t testing.TB, r *rand.Rand) *lnwire.ChannelUpdate {
 	t.Helper()
 
 	msgFlags := lnwire.ChanUpdateMsgFlags(r.Int31())
-	maxHtlc := lnwire.MilliSatoshi(r.Int63())
+	maxHtlc := lnwire.UnitPrec11(r.Int63())
 
 	// We make the max_htlc field zero if it is not flagged
 	// as being part of the ChannelUpdate, to pass
@@ -690,10 +691,10 @@ func newMsgChannelUpdate(t testing.TB, r *rand.Rand) *lnwire.ChannelUpdate {
 		MessageFlags:    msgFlags,
 		ChannelFlags:    lnwire.ChanUpdateChanFlags(r.Int31()),
 		TimeLockDelta:   uint16(r.Int31()),
-		HtlcMinimumMsat: lnwire.MilliSatoshi(r.Int63()),
+		HtlcMinimumMsat: lnwire.UnitPrec11(r.Int63()),
 		HtlcMaximumMsat: maxHtlc,
 		BaseFee:         uint32(r.Int31()),
-		FeeRate:         uint32(r.Int31()),
+		FeeRate:         lnwire.UnitPrec11(r.Int31()),
 		ExtraOpaqueData: createExtraData(t, r),
 		Signature:       testNodeSig,
 	}

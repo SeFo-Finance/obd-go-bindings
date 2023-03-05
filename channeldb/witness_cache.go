@@ -63,13 +63,6 @@ type WitnessCache struct {
 	db *DB
 }
 
-// NewWitnessCache returns a new instance of the witness cache.
-func (d *DB) NewWitnessCache() *WitnessCache {
-	return &WitnessCache{
-		db: d,
-	}
-}
-
 // witnessEntry is a key-value struct that holds each key -> witness pair, used
 // when inserting records into the cache.
 type witnessEntry struct {

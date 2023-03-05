@@ -5,7 +5,8 @@ import (
 	"sync"
 
 	"github.com/lightningnetwork/lnd/lntypes"
-	"github.com/lightningnetwork/lnd/record"
+
+	"github.com/SeFo-Finance/obd-go-bindings/record"
 )
 
 // PaymentShard is an interface representing a shard tracked by the
