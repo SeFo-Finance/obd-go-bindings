@@ -12,7 +12,7 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 
-	"github.com/lightningnetwork/lnd/lnwallet/chainfee"
+	"github.com/SeFo-Finance/obd-go-bindings/lnwallet/chainfee"
 
 	"github.com/SeFo-Finance/obd-go-bindings/channeldb"
 	"github.com/SeFo-Finance/obd-go-bindings/input"
