@@ -3,13 +3,14 @@ package chancloser
 import (
 	"bytes"
 	"fmt"
+
+	"github.com/SeFo-Finance/obd-go-bindings/labels"
+	"github.com/SeFo-Finance/obd-go-bindings/lnwallet/chainfee"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/lightningnetwork/lnd/labels"
-	"github.com/lightningnetwork/lnd/lnwallet/chainfee"
 
 	"github.com/SeFo-Finance/obd-go-bindings/htlcswitch"
 	"github.com/SeFo-Finance/obd-go-bindings/input"

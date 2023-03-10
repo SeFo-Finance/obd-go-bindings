@@ -14,6 +14,7 @@ import (
 	"github.com/SeFo-Finance/obd-go-bindings/lnwallet/omnicore/op"
 	"github.com/SeFo-Finance/obd-go-bindings/omnicore"
 
+	"github.com/SeFo-Finance/obd-go-bindings/lnwallet/chainfee"
 	"github.com/btcsuite/btcd/blockchain"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
@@ -25,7 +26,6 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/lightningnetwork/lnd/build"
 	"github.com/lightningnetwork/lnd/chainntnfs"
-	"github.com/lightningnetwork/lnd/lnwallet/chainfee"
 
 	"github.com/SeFo-Finance/obd-go-bindings/channeldb"
 	"github.com/SeFo-Finance/obd-go-bindings/input"
@@ -237,7 +237,7 @@ func (pd *PaymentDescriptor) SetAmtFromHtlcMsg(htlc *lnwire.UpdateAddHTLC) {
 // the original added HTLC.
 //
 // TODO(roasbeef): LogEntry interface??
-//  * need to separate attrs for cancel/add/settle/feeupdate
+//   - need to separate attrs for cancel/add/settle/feeupdate
 type PaymentDescriptor struct {
 	// RHash is the payment hash for this HTLC. The HTLC can be settled iff
 	// the preimage to this hash is presented.
@@ -1079,8 +1079,8 @@ func (s *commitmentChain) hasUnackedCommitment() bool {
 //
 // TODO(roasbeef): create lightning package, move commitment and update to
 // package?
-//  * also move state machine, separate from lnwallet package
-//  * possible embed updateLog within commitmentChain.
+//   - also move state machine, separate from lnwallet package
+//   - possible embed updateLog within commitmentChain.
 type updateLog struct {
 	// logIndex is a monotonically increasing integer that tracks the total
 	// number of update entries ever applied to the log. When sending new
@@ -1273,18 +1273,18 @@ func compactLogs(ourLog, theirLog *updateLog,
 // preimages in order to populate their revocation window for the remote party.
 //
 // The state machine has for main methods:
-//  * .SignNextCommitment()
-//    * Called one one wishes to sign the next commitment, either initiating a
-//      new state update, or responding to a received commitment.
-//  * .ReceiveNewCommitment()
-//    * Called upon receipt of a new commitment from the remote party. If the
-//      new commitment is valid, then a revocation should immediately be
-//      generated and sent.
-//  * .RevokeCurrentCommitment()
-//    * Revokes the current commitment. Should be called directly after
-//      receiving a new commitment.
-//  * .ReceiveRevocation()
-//   * Processes a revocation from the remote party. If successful creates a
+//   - .SignNextCommitment()
+//   - Called one one wishes to sign the next commitment, either initiating a
+//     new state update, or responding to a received commitment.
+//   - .ReceiveNewCommitment()
+//   - Called upon receipt of a new commitment from the remote party. If the
+//     new commitment is valid, then a revocation should immediately be
+//     generated and sent.
+//   - .RevokeCurrentCommitment()
+//   - Revokes the current commitment. Should be called directly after
+//     receiving a new commitment.
+//   - .ReceiveRevocation()
+//   - Processes a revocation from the remote party. If successful creates a
 //     new defacto broadcastable state.
 //
 // See the individual comments within the above methods for further details.
@@ -3892,10 +3892,10 @@ func (lc *LightningChannel) SignNextCommitment() (lnwire.Sig, []lnwire.Sig, []ch
 //
 // One of two message sets will be returned:
 //
-//  * CommitSig+Updates: if we have a pending remote commit which they claim to
-//    have not received
-//  * RevokeAndAck: if we sent a revocation message that they claim to have
-//    not received
+//   - CommitSig+Updates: if we have a pending remote commit which they claim to
+//     have not received
+//   - RevokeAndAck: if we sent a revocation message that they claim to have
+//     not received
 //
 // If we detect a scenario where we need to send a CommitSig+Updates, this
 // method also returns two sets channeldb.CircuitKeys identifying the circuits
@@ -4899,14 +4899,14 @@ func (lc *LightningChannel) RevokeCurrentCommitment() (*lnwire.RevokeAndAck, []c
 // commitment, and a log compaction is attempted.
 //
 // The returned values correspond to:
-//   1. The forwarding package corresponding to the remote commitment height
-//      that was revoked.
-//   2. The PaymentDescriptor of any Add HTLCs that were locked in by this
-//      revocation.
-//   3. The PaymentDescriptor of any Settle/Fail HTLCs that were locked in by
-//      this revocation.
-//   4. The set of HTLCs present on the current valid commitment transaction
-//      for the remote party.
+//  1. The forwarding package corresponding to the remote commitment height
+//     that was revoked.
+//  2. The PaymentDescriptor of any Add HTLCs that were locked in by this
+//     revocation.
+//  3. The PaymentDescriptor of any Settle/Fail HTLCs that were locked in by
+//     this revocation.
+//  4. The set of HTLCs present on the current valid commitment transaction
+//     for the remote party.
 func (lc *LightningChannel) ReceiveRevocation(revMsg *lnwire.RevokeAndAck) (
 	*channeldb.FwdPkg, []*PaymentDescriptor, []*PaymentDescriptor,
 	[]channeldb.HTLC, error) {
@@ -5441,20 +5441,21 @@ func (lc *LightningChannel) ReceiveHTLC(htlc *lnwire.UpdateAddHTLC) (uint64, err
 // is invalid, an error is returned.
 //
 // The additional arguments correspond to:
-//  * sourceRef: specifies the location of the Add HTLC within a forwarding
-//      package that this HTLC is settling. Every Settle fails exactly one Add,
-//      so this should never be empty in practice.
 //
-//  * destRef: specifies the location of the Settle HTLC within another
-//      channel's forwarding package. This value can be nil if the corresponding
-//      Add HTLC was never locked into an outgoing commitment txn, or this
-//      HTLC does not originate as a response from the peer on the outgoing
-//      link, e.g. on-chain resolutions.
+//   - sourceRef: specifies the location of the Add HTLC within a forwarding
+//     package that this HTLC is settling. Every Settle fails exactly one Add,
+//     so this should never be empty in practice.
 //
-//  * closeKey: identifies the circuit that should be deleted after this Settle
-//      HTLC is included in a commitment txn. This value should only be nil if
-//      the HTLC was settled locally before committing a circuit to the circuit
-//      map.
+//   - destRef: specifies the location of the Settle HTLC within another
+//     channel's forwarding package. This value can be nil if the corresponding
+//     Add HTLC was never locked into an outgoing commitment txn, or this
+//     HTLC does not originate as a response from the peer on the outgoing
+//     link, e.g. on-chain resolutions.
+//
+//   - closeKey: identifies the circuit that should be deleted after this Settle
+//     HTLC is included in a commitment txn. This value should only be nil if
+//     the HTLC was settled locally before committing a circuit to the circuit
+//     map.
 //
 // NOTE: It is okay for sourceRef, destRef, and closeKey to be nil when unit
 // testing the wallet.
@@ -5555,20 +5556,21 @@ func (lc *LightningChannel) ReceiveHTLCSettle(preimage [32]byte, htlcIndex uint6
 // _incoming_ HTLC.
 //
 // The additional arguments correspond to:
-//  * sourceRef: specifies the location of the Add HTLC within a forwarding
-//      package that this HTLC is failing. Every Fail fails exactly one Add, so
-//      this should never be empty in practice.
 //
-//  * destRef: specifies the location of the Fail HTLC within another channel's
-//      forwarding package. This value can be nil if the corresponding Add HTLC
-//      was never locked into an outgoing commitment txn, or this HTLC does not
-//      originate as a response from the peer on the outgoing link, e.g.
-//      on-chain resolutions.
+//   - sourceRef: specifies the location of the Add HTLC within a forwarding
+//     package that this HTLC is failing. Every Fail fails exactly one Add, so
+//     this should never be empty in practice.
 //
-//  * closeKey: identifies the circuit that should be deleted after this Fail
-//      HTLC is included in a commitment txn. This value should only be nil if
-//      the HTLC was failed locally before committing a circuit to the circuit
-//      map.
+//   - destRef: specifies the location of the Fail HTLC within another channel's
+//     forwarding package. This value can be nil if the corresponding Add HTLC
+//     was never locked into an outgoing commitment txn, or this HTLC does not
+//     originate as a response from the peer on the outgoing link, e.g.
+//     on-chain resolutions.
+//
+//   - closeKey: identifies the circuit that should be deleted after this Fail
+//     HTLC is included in a commitment txn. This value should only be nil if
+//     the HTLC was failed locally before committing a circuit to the circuit
+//     map.
 //
 // NOTE: It is okay for sourceRef, destRef, and closeKey to be nil when unit
 // testing the wallet.
@@ -6978,7 +6980,7 @@ func (lc *LightningChannel) CompleteCooperativeClose(
 	return closeTx, ourBalance, nil
 }
 
-//for support asset simpleSend on mainnet
+// for support asset simpleSend on mainnet
 func (lc *LightningChannel) OB_AssetCompleteCooperativeClose(
 	localSig, remoteSig []input.Signature,
 	localDeliveryScript, remoteDeliveryScript []byte,
@@ -7569,7 +7571,7 @@ func CreateCooperativeCloseTx(amts *op.PksAmounts, fundingTxIn wire.TxIn,
 	return closeTx
 }
 
-//for support asset-simpleSend on mainnet
+// for support asset-simpleSend on mainnet
 func OB_AssetCreateCooperativeCloseTx(assetId uint32, cap, fee btcutil.Amount, fundIngPkScript []byte, fundingTxIn wire.TxIn,
 	localDust, remoteDust, ourBalance, theirBalance btcutil.Amount, ourAssetBalance, theirAssetBalance omnicore.Amount,
 	ourDeliveryScript, theirDeliveryScript []byte) (*wire.MsgTx, *wire.MsgTx) {
